@@ -1,0 +1,30 @@
+name: CI Pipeline   # pipeline ka naam
+
+on: 
+  push:             # kab trigger hoga
+    branches: 
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:            # ek job ka naam
+    runs-on: ubuntu-latest   # kis runner par chalega (agent jaisa)
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3    # repo ka code checkout karega
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"    # python version set karega
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Tests
+        run: |
+          pytest
