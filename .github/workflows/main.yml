@@ -1,30 +1,42 @@
-name: CI Pipeline   # pipeline ka naam
+name: CI Pipeline   # Workflow ka naam
 
-on: 
-  push:             # kab trigger hoga
-    branches: 
-      - main
-  pull_request:
-    branches:
-      - main
+# ---- Trigger Options ----
+on:
+  push:             # jab bhi code push hoga
+    branches: [ main ]
+  pull_request:     # jab PR banega
+    branches: [ main ]
+  workflow_dispatch:  # manually run karne ka option
 
+# ---- Jobs ----
 jobs:
-  build:            # ek job ka naam
-    runs-on: ubuntu-latest   # kis runner par chalega (agent jaisa)
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3    # repo ka code checkout karega
+  build-and-test:
+    runs-on: ubuntu-latest   # runner machine (Linux)
 
+    steps:
+      # 1. Code checkout
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # 2. Python setup
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"    # python version set karega
+          python-version: "3.10"
 
-      - name: Install dependencies
+      # 3. Dependencies install (agar requirements.txt ho to)
+      - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      # 4. Linting (code quality check)
+      - name: Run Linter
+        run: |
+          pip install flake8
+          flake8 . --max-line-length=120
+
+      # 5. Tests run karna
       - name: Run Tests
         run: |
-          pytest
+          pip install pytest
+          pytest -v
